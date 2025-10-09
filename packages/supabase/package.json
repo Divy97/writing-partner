@@ -1,0 +1,15 @@
+{
+  "name": "@aura/supabase",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Supabase configuration and migrations for Aura",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "status": "supabase status",
+    "reset": "supabase db reset",
+    "migrate": "supabase db push",
+    "gen-types": "supabase gen types typescript --local > ../extension/types/supabase.ts"
+  }
+}
+

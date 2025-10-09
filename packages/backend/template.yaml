@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Aura Writing Partner - Serverless Backend
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        SUPABASE_URL: !Ref SupabaseUrl
+        SUPABASE_ANON_KEY: !Ref SupabaseAnonKey
+        JWT_SECRET: !Ref JwtSecret
+
+Parameters:
+  SupabaseUrl:
+    Type: String
+    Description: Supabase project URL
+  SupabaseAnonKey:
+    Type: String
+    Description: Supabase anonymous key
+  JwtSecret:
+    Type: String
+    Description: JWT secret for authentication
+    NoEcho: true
+  GeminiApiKey:
+    Type: String
+    Description: Google Gemini API key
+    NoEcho: true
+  ClaudeApiKey:
+    Type: String
+    Description: Anthropic Claude API key
+    NoEcho: true
+
+Resources:
+  AuraApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  TriageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/triage/
+      Handler: index.handler
+      Description: Fast triage service for simple grammar checks
+      Events:
+        TriageApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AuraApi
+            Path: /triage
+            Method: post
+
+  CorrectionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/correct/
+      Handler: index.handler
+      Description: Main correction service using LLM
+      Environment:
+        Variables:
+          GEMINI_API_KEY: !Ref GeminiApiKey
+      Events:
+        CorrectionApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AuraApi
+            Path: /correct
+            Method: post
+
+  ExplanationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/explain/
+      Handler: index.handler
+      Description: Explanation service using advanced LLM
+      Timeout: 60
+      Environment:
+        Variables:
+          CLAUDE_API_KEY: !Ref ClaudeApiKey
+      Events:
+        ExplanationApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AuraApi
+            Path: /explain
+            Method: post
+
+  LogInteractionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/log-interaction/
+      Handler: index.handler
+      Description: Log user interactions to S3 data lake
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref InteractionLogsBucket
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref InteractionLogsBucket
+
+  InteractionLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'aura-interaction-logs-${AWS::AccountId}'
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${AuraApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
+  BucketName:
+    Description: S3 bucket for interaction logs
+    Value: !Ref InteractionLogsBucket
+

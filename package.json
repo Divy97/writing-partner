@@ -1,0 +1,32 @@
+{
+  "name": "aura-writing-partner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aura - The Intelligent Writing Partner",
+  "author": "Divy Parekh",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev:extension": "pnpm --filter extension dev",
+    "build:extension": "pnpm --filter extension build",
+    "dev:backend": "pnpm --filter backend dev",
+    "build:backend": "pnpm --filter backend build",
+    "deploy:backend": "pnpm --filter backend deploy",
+    "supabase:start": "cd packages/supabase && supabase start",
+    "supabase:stop": "cd packages/supabase && supabase stop",
+    "supabase:migrate": "cd packages/supabase && supabase db push",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  }
+}
+

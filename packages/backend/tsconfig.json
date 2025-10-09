@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig-custom/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "moduleResolution": "node",
+    "types": ["node", "@types/aws-lambda"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", ".aws-sam"]
+}
+

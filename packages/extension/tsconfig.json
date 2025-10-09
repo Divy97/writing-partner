@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig-custom/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["chrome", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".wxt/types/**/*.d.ts"],
+  "exclude": ["node_modules", ".wxt", ".output", "dist"]
+}
+
